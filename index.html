@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>高于翔專屬｜智光商工 資處一仁 數位科技概論提分戰情室</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#1e3a8a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-500 selection:text-white">
+
+  <!-- 彩花 Canvas -->
+  <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full" style="display:none;"></canvas>
+
+  <!-- 頂部身分識別與導航列 -->
+  <header class="sticky top-0 z-40 bg-slate-900/85 backdrop-blur-md border-b border-slate-800 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- 左側 LOGO 與身分標記 -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-blue-500/20 text-xl font-bold">
+            💻
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-base sm:text-lg font-black tracking-tight text-white">智光商工・資處一仁</span>
+              <span class="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold border border-blue-500/30">
+                26 號 高于翔
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 hidden sm:block">數位科技概論（上）第 3 章 系統平台組成架構－硬體 提分戰情室</p>
+          </div>
+        </div>
+
+        <!-- 右側功能操作按鈕 -->
+        <div class="flex items-center gap-2">
+          <button id="soundToggleBtn" class="px-3 py-1.5 rounded-lg bg-blue-600/30 text-blue-300 hover:bg-blue-600/40 text-xs font-semibold border border-blue-500/30 transition-all flex items-center gap-1.5">
+            🔊 音效已開
+          </button>
+          <button onclick="preparePrintExam(false)" class="hidden md:flex px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-all items-center gap-1">
+            🖨️ 列印空白卷
+          </button>
+          <button onclick="preparePrintExam(true)" class="hidden md:flex px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-all items-center gap-1">
+            📄 列印解答本
+          </button>
+        </div>
+      </div>
+
+      <!-- 導航功能頁籤 (Tabs) -->
+      <nav class="flex space-x-1 sm:space-x-2 overflow-x-auto pb-2 scrollbar-none text-sm font-medium border-t border-slate-800/60 pt-2">
+        <button class="nav-tab active px-4 py-2 rounded-lg text-slate-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap" data-tab="dashboard" onclick="switchTab('dashboard')">
+          <span>📊</span> 戰情儀表板
+        </button>
+        <button class="nav-tab px-4 py-2 rounded-lg text-slate-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap" data-tab="mistakes" onclick="switchTab('mistakes')">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+          </span>
+          <span>🎯</span> 錯題死磕精攻 (6大弱點)
+        </button>
+        <button class="nav-tab px-4 py-2 rounded-lg text-slate-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap" data-tab="exam" onclick="switchTab('exam')">
+          <span>📝</span> 原卷全真模擬考 (25題)
+        </button>
+        <button class="nav-tab px-4 py-2 rounded-lg text-slate-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap" data-tab="tuce" onclick="switchTab('tuce')">
+          <span>⚡</span> 統測歷屆衝刺題庫 (20題)
+        </button>
+        <button class="nav-tab px-4 py-2 rounded-lg text-slate-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap" data-tab="knowledge" onclick="switchTab('knowledge')">
+          <span>📖</span> 考點必背速記庫
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 主內容區塊 -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ================= TAB 1: 戰情儀表板 ================= -->
+    <section id="tab-dashboard" class="tab-content space-y-6">
+      <!-- 英雄激勵橫幅 -->
+      <div class="glass-panel-accent p-6 sm:p-8 relative overflow-hidden">
+        <div class="relative z-10 max-w-3xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold border border-blue-500/40 mb-3">
+            🎯 智光商工資處科・期中高分衝刺專案
+          </div>
+          <h1 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">
+            高于翔同學，歡迎進入<span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">數位科技概論</span>提分作戰基地！
+          </h1>
+          <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
+            本次第 3 回小考得分 <b class="text-amber-400 text-lg">76 分</b>（錯 6 題，扣 24 分）。別氣餒！你的基本功非常扎實（前 14 題連對 14 題！），失分純粹落入「單位換算」、「SSD vs HDD 特性」與「ROM 種類」的題目陷阱。透過本系統的<b class="text-blue-300">「錯題靶向精攻」</b>與<b class="text-blue-300">「雙胞胎變形題」</b>，保證你下次隨堂測驗與段考直取 90~100 分滿分！
+          </p>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <button onclick="switchTab('mistakes')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-pink-600 text-white font-bold text-sm shadow-lg shadow-red-600/30 hover:brightness-110 transition-all flex items-center gap-2">
+              <span>🚨</span> 立即攻克 6 大錯題弱點
+            </button>
+            <button onclick="switchTab('exam')" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm border border-slate-700 transition-all flex items-center gap-2">
+              <span>📝</span> 重測一次隨堂考卷（目標100）
+            </button>
+            <button onclick="switchTab('knowledge')" class="px-5 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-bold text-sm border border-slate-700 transition-all">
+              <span>📖</span> 考前 5 分鐘必背速記
+            </button>
+          </div>
+        </div>
+
+        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      </div>
+
+      <!-- 戰情數據卡片群 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- 卡片 1: 本次小考分數 -->
+        <div class="glass-panel p-5 border-l-4 border-amber-500">
+          <div class="text-xs text-slate-400 font-semibold mb-1">本次實戰得分</div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-4xl font-black text-amber-400">76</span>
+            <span class="text-xs text-slate-400">/ 100 分</span>
+          </div>
+          <div class="mt-2 text-xs text-slate-300 flex items-center gap-1">
+            <span>📉 答錯 6 題（每題 4 分）</span>
+          </div>
+        </div>
+
+        <!-- 卡片 2: 個人最高紀錄 -->
+        <div class="glass-panel p-5 border-l-4 border-emerald-500">
+          <div class="text-xs text-slate-400 font-semibold mb-1">系統重測最佳紀錄</div>
+          <div class="flex items-baseline gap-2">
+            <span id="bestScoreDisplay" class="text-4xl font-black text-emerald-400">76</span>
+            <span class="text-xs text-slate-400">/ 100 分</span>
+          </div>
+          <div id="scoreGapDisplay" class="mt-2 text-xs text-emerald-300 flex items-center gap-1 font-semibold">
+            距離滿分還差 24 分
+          </div>
+        </div>
+
+        <!-- 卡片 3: 雙胞胎弱點攻克率 -->
+        <div class="glass-panel p-5 border-l-4 border-blue-500">
+          <div class="text-xs text-slate-400 font-semibold mb-1">錯題雙胞胎變形題進度</div>
+          <div class="flex items-baseline gap-2">
+            <span id="twinProgress" class="text-3xl font-black text-blue-400">0 / 6 題完成</span>
+          </div>
+          <div class="mt-2 text-xs text-slate-400">
+            完全弄懂才能在考場不踩坑
+          </div>
+        </div>
+
+        <!-- 卡片 4: 統測衝刺題庫 -->
+        <div class="glass-panel p-5 border-l-4 border-purple-500">
+          <div class="text-xs text-slate-400 font-semibold mb-1">統測歷屆精選題庫</div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-4xl font-black text-purple-400">20</span>
+            <span class="text-xs text-slate-400">題經典</span>
+          </div>
+          <div class="mt-2 text-xs text-purple-300">
+            高職四技二專必考精華
+          </div>
+        </div>
+      </div>
+
+      <!-- 本次小考失分診斷表 -->
+      <div class="glass-panel p-6">
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <span>🔍</span> 本次試卷失分盲點 X 光檢驗報告
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- 錯題 15 -->
+          <div class="bg-slate-900/70 p-4 rounded-xl border border-red-500/30 hover:border-red-500/60 transition-all cursor-pointer" onclick="switchTab('mistakes')">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-bold">第 15 題 (-4分)</span>
+              <span class="text-xs text-slate-400">時脈頻率換算</span>
+            </div>
+            <div class="text-sm font-semibold text-slate-200 mb-1">2.80GHz CPU 振盪頻率</div>
+            <div class="text-xs text-slate-400">
+              陷阱：1 GHz = 10 億次，2.80 GHz 是 28 億次/秒，不是 2.80 億！
+            </div>
+          </div>
+
+          <!-- 錯題 16 -->
+          <div class="bg-slate-900/70 p-4 rounded-xl border border-red-500/30 hover:border-red-500/60 transition-all cursor-pointer" onclick="switchTab('mistakes')">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-bold">第 16 題 (-4分)</span>
+              <span class="text-xs text-slate-400">SSD vs HDD</span>
+            </div>
+            <div class="text-sm font-semibold text-slate-200 mb-1">固態硬碟的機械結構與重組</div>
+            <div class="text-xs text-slate-400">
+              陷阱：SSD 無馬達與讀寫頭；SSD 絕對不需要進行磁碟重組！
+            </div>
+          </div>
+
+          <!-- 錯題 17 -->
+          <div class="bg-slate-900/70 p-4 rounded-xl border border-red-500/30 hover:border-red-500/60 transition-all cursor-pointer" onclick="switchTab('mistakes')">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-bold">第 17 題 (-4分)</span>
+              <span class="text-xs text-slate-400">快取記憶體材質</span>
+            </div>
+            <div class="text-sm font-semibold text-slate-200 mb-1">Cache Memory 的硬體材質</div>
+            <div class="text-xs text-slate-400">
+              陷阱：快取是用超高速的 SRAM，EPROM 是唯讀記憶體，速度極慢！
+            </div>
+          </div>
+
+          <!-- 錯題 19 -->
+          <div class="bg-slate-900/70 p-4 rounded-xl border border-red-500/30 hover:border-red-500/60 transition-all cursor-pointer" onclick="switchTab('mistakes')">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-bold">第 19 題 (-4分)</span>
+              <span class="text-xs text-slate-400">悠遊卡儲存元件</span>
+            </div>
+            <div class="text-sm font-semibold text-slate-200 mb-1">悠遊卡晶片儲存資料元件</div>
+            <div class="text-xs text-slate-400">
+              陷阱：薄卡片塞不下傳統硬碟(HDD)！是斷電不消失且能多次抹寫的 EEPROM！
+            </div>
+          </div>
+
+          <!-- 錯題 22 -->
+          <div class="bg-slate-900/70 p-4 rounded-xl border border-red-500/30 hover:border-red-500/60 transition-all cursor-pointer" onclick="switchTab('mistakes')">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-bold">第 22 題 (-4分)</span>
+              <span class="text-xs text-slate-400">AMOLED 材質</span>
+            </div>
+            <div class="text-sm font-semibold text-slate-200 mb-1">AMOLED 智慧手機螢幕材質</div>
+            <div class="text-xs text-slate-400">
+              陷阱：OLED 是「有機發光二極體」，液晶是 LCD！
+            </div>
+          </div>
+
+          <!-- 錯題 24 -->
+          <div class="bg-slate-900/70 p-4 rounded-xl border border-red-500/30 hover:border-red-500/60 transition-all cursor-pointer" onclick="switchTab('mistakes')">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-bold">第 24 題 (-4分)</span>
+              <span class="text-xs text-slate-400">連接埠功能</span>
+            </div>
+            <div class="text-sm font-semibold text-slate-200 mb-1">Type-C、HDMI、Line Out 操作判斷</div>
+            <div class="text-xs text-slate-400">
+              陷阱：問的是「何者不正確」！Line Out 是音源孔不能上網；Type-C 支援供電！
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 2: 錯題死磕精攻 ================= -->
+    <section id="tab-mistakes" class="tab-content hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-red-950/30 p-5 rounded-2xl border border-red-500/30">
+        <div>
+          <h2 class="text-xl font-black text-white flex items-center gap-2">
+            <span>🎯</span> 隨堂測驗 6 大錯題・死磕靶向特訓
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 mt-1">
+            重現老師紅筆批註與你的原答，搭配「盲點剖析」、「必殺記憶口訣」與「雙胞胎現場驗收題」！
+          </p>
+        </div>
+        <div class="text-xs bg-red-500/20 text-red-300 font-bold px-3 py-1.5 rounded-lg border border-red-500/30 self-start sm:self-center">
+          全部答對變形題即攻克弱點
+        </div>
+      </div>
+
+      <!-- 錯題清單由 JS 動態生成 -->
+      <div id="mistakesListContainer" class="space-y-6"></div>
+    </section>
+
+    <!-- ================= TAB 3: 原卷全真模擬考 ================= -->
+    <section id="tab-exam" class="tab-content hidden space-y-6">
+      <!-- 測驗頂部控制列 -->
+      <div class="glass-panel p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <span>📝</span> 第3回隨堂測驗：全真重考演練
+          </h2>
+          <div class="flex items-center gap-3 mt-1 text-xs text-slate-400">
+            <span>範圍：第3章 系統平台的組成架構－硬體</span>
+            <span>•</span>
+            <span id="examProgressBadge" class="text-blue-400 font-semibold">已作答：0 / 25 題</span>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- 篩選模式 -->
+          <div class="flex rounded-lg bg-slate-900 p-1 border border-slate-800 text-xs font-semibold">
+            <button class="exam-filter-btn px-3 py-1.5 rounded-md bg-blue-600 text-white transition-all" data-mode="all" onclick="setExamFilter('all')">
+              全部25題
+            </button>
+            <button class="exam-filter-btn px-3 py-1.5 rounded-md text-slate-400 hover:text-white transition-all" data-mode="wrong-only" onclick="setExamFilter('wrong-only')">
+              只練曾錯的6題
+            </button>
+            <button class="exam-filter-btn px-3 py-1.5 rounded-md text-slate-400 hover:text-white transition-all" data-mode="random-10" onclick="setExamFilter('random-10')">
+              隨機抽10題
+            </button>
+          </div>
+
+          <button onclick="submitExam()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 hover:brightness-110 transition-all flex items-center gap-1.5">
+            <span>🚀</span> 批改交卷
+          </button>
+        </div>
+      </div>
+
+      <!-- 題目快速跳轉按鈕列 -->
+      <div class="glass-panel p-4">
+        <div class="text-xs font-semibold text-slate-400 mb-2">題目快速索引（點擊跳至該題）：</div>
+        <div id="examQuickJumpBar" class="flex flex-wrap gap-1.5"></div>
+      </div>
+
+      <!-- 題目渲染清單 -->
+      <div id="examQuestionsContainer" class="space-y-4"></div>
+
+      <!-- 底部交卷按鈕 -->
+      <div class="text-center py-6">
+        <button onclick="submitExam()" class="px-8 py-3 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-extrabold text-base shadow-xl shadow-blue-600/30 hover:scale-105 active:scale-95 transition-all">
+          ✨ 完成作答，送出看成績！
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= TAB 4: 統測歷屆衝刺題庫 ================= -->
+    <section id="tab-tuce" class="tab-content hidden space-y-6">
+      <div class="glass-panel-accent p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span class="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-bold text-xs border border-purple-500/30">
+            四技二專高分保證
+          </span>
+          <h2 class="text-xl sm:text-2xl font-black text-white mt-1">
+            統測數位科技概論・硬體高頻考題挑戰庫（20題）
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 mt-1">
+            精選商業管理群、資訊電機群統測大考必考的馮紐曼架構、暫存器、RAID、匯流排與中斷機制！
+          </p>
+        </div>
+      </div>
+
+      <div id="tuceListContainer" class="space-y-4"></div>
+    </section>
+
+    <!-- ================= TAB 5: 考點必背速記庫 ================= -->
+    <section id="tab-knowledge" class="tab-content hidden space-y-6">
+      <div class="glass-panel p-6 border-l-4 border-blue-500">
+        <h2 class="text-xl font-black text-white flex items-center gap-2">
+          <span>📖</span> 數位科技概論（硬體篇）核心必背神級筆記
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-300 mt-1">
+          統測與段考最愛考的 6 大精華圖表，利用下課 5 分鐘刷一遍，觀念立刻通透！
+        </p>
+      </div>
+
+      <div id="knowledgeContainer" class="space-y-6"></div>
+    </section>
+
+  </main>
+
+  <!-- 測驗結算彈窗 Modal -->
+  <div id="examResultModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-panel p-6 sm:p-8 max-w-md w-full border border-blue-500/40 shadow-2xl text-center space-y-4 animate-fadeIn">
+      <div class="text-4xl">🏆</div>
+      <h3 id="modalTitle" class="text-2xl font-black text-white">成績結算</h3>
+      
+      <div class="py-4">
+        <div class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-emerald-400">
+          <span id="modalScoreNumber">100</span><span class="text-2xl text-slate-400 font-normal"> 分</span>
+        </div>
+        <div id="modalCorrectSummary" class="text-sm text-slate-300 mt-2">答對 25 / 25 題</div>
+      </div>
+
+      <p id="modalCheerText" class="text-sm text-slate-300 bg-slate-900/80 p-4 rounded-xl border border-slate-800 leading-relaxed">
+        于翔！你的表現太出色了！
+      </p>
+
+      <div class="flex gap-2 justify-center pt-2">
+        <button onclick="closeResultModal()" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition-all flex-1">
+          檢視答題與詳解
+        </button>
+        <button onclick="setExamFilter('wrong-only'); closeResultModal();" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm border border-slate-700 transition-all">
+          只看錯題
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 用於列印的隱藏獨立容器 -->
+  <div id="printableArea" class="hidden print-only"></div>
+
+  <!-- 頁腳 -->
+  <footer class="mt-auto border-t border-slate-800/80 bg-slate-950/80 py-6 text-center text-xs text-slate-500">
+    <p>智光商工 資料處理科 一年仁班 26 號 高于翔 專屬學習網站</p>
+    <p class="mt-1">數位科技概論（上）隨堂測驗卷 第 3 回 提分系統 • 祝段考與統測榮獲滿分！</p>
+  </footer>
+
+  <!-- 載入題庫與應用程式 JS -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
+
